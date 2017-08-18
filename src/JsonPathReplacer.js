@@ -17,8 +17,7 @@ const jsonpath = require('jsonpath');
  *
  * @class JsonPathReplacer
  */
-class JsonPathReplacer {
-
+module.exports = class JsonPathReplacer {
   /**
    * Searches for JSONPath tokens in the requests and replaces them with the
    * values from previous responses.
@@ -333,6 +332,4 @@ class JsonPathReplacer {
   static _getContentId(response: Response): string {
     return (response.headers.get('Content-ID') || '').slice(1, -1);
   }
-}
-
-module.exports = JsonPathReplacer;
+};
