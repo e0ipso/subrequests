@@ -18,8 +18,7 @@ const querystring = require('querystring');
  *
  * @class HttpRequestor
  */
-class HttpRequestor implements RequestorInterface {
-
+module.exports = class HttpRequestor implements RequestorInterface {
   /**
    * Makes multiple requests in parallel.
    *
@@ -168,7 +167,4 @@ class HttpRequestor implements RequestorInterface {
         throw new Error('Unexpected action. Impossible to map to an HTTP method.');
     }
   }
-
-}
-
-module.exports = HttpRequestor;
+};

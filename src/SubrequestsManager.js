@@ -12,8 +12,7 @@ const JsonPathReplacer = require('./JsonPathReplacer');
  *
  * @class SubrequestsManager
  */
-class SubrequestsManager {
-
+module.exports = class SubrequestsManager {
   /**
    * Take a request tree and issue the subrequests with the requestor.
    *
@@ -133,6 +132,4 @@ class SubrequestsManager {
     }
     response.headers.set('Content-ID', `<${requestId}>`);
   }
-}
-
-module.exports = SubrequestsManager;
+};

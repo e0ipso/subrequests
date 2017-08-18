@@ -13,8 +13,7 @@ const md5 = require('md5');
  *
  * @class MultipartRelatedResponse
  */
-class MultipartRelatedResponse extends ResponseMergerBase implements ResponseMergerInterface {
-
+module.exports = class MultipartRelatedResponse extends ResponseMergerBase implements ResponseMergerInterface {
   /**
    * Merges many responses into a single one.
    *
@@ -89,7 +88,4 @@ class MultipartRelatedResponse extends ResponseMergerBase implements ResponseMer
   static _generateDelimiter(): string {
     return md5(Date.now()).substr(0, 6);
   }
-
-}
-
-module.exports = MultipartRelatedResponse;
+};
