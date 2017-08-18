@@ -17,8 +17,7 @@ const validate = ajv.compile(blueprintSchema);
  *
  * @class BlueprintManager
  */
-class BlueprintManager {
-
+module.exports = class BlueprintManager {
   /**
    * Parses the input data and produces a blueprint tree.
    *
@@ -142,7 +141,4 @@ class BlueprintManager {
       .indexOf(item.action) !== -1, true));
     return parsed.reduce((valid, rawItem) => valid && isValidItem(rawItem), true);
   }
-
-}
-
-module.exports = BlueprintManager;
+};

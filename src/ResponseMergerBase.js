@@ -11,8 +11,7 @@ import type { Response } from '../types/Responses';
  *
  * @abstract
  */
-class ResponseMergerBase {
-
+module.exports = class ResponseMergerBase {
   /**
    * Carriage return line feed.
    *
@@ -67,7 +66,4 @@ class ResponseMergerBase {
     });
     return output || 'application/json';
   }
-
-}
-
-module.exports = ResponseMergerBase;
+};
