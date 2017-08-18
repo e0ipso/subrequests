@@ -66,7 +66,6 @@
     "access": "restricted"
   },
   "release": {
-    "analyzeCommits": "semantic-release-conventional-commits",
-    "getLastRelease": "last-release-git"
+    "analyzeCommits": "semantic-release-conventional-commits"
   }
 }
