@@ -1,4 +1,6 @@
 # Subrequests
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/e0ipso/subrequests.svg)](https://greenkeeper.io/)
 [![Build Status](https://travis-ci.org/e0ipso/subrequests.svg?branch=master)](https://travis-ci.org/e0ipso/subrequests)
 [![Coverage Status](https://coveralls.io/repos/github/e0ipso/subrequests/badge.svg?branch=master)](https://coveralls.io/github/e0ipso/subrequests?branch=master)
 
