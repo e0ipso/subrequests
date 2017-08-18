@@ -1,5 +1,6 @@
 # Subrequests
-[![Build Status](https://travis-ci.com/e0ipso/subrequests.svg?token=Ht79a9TvsY7Rvmse5NG6&branch=master)](https://travis-ci.com/e0ipso/subrequests)
+[![Build Status](https://travis-ci.org/e0ipso/subrequests.svg?branch=master)](https://travis-ci.org/e0ipso/subrequests)
+[![Coverage Status](https://coveralls.io/repos/github/e0ipso/subrequests/badge.svg?branch=master)](https://coveralls.io/github/e0ipso/subrequests?branch=master)
 
 ## Installation
 
