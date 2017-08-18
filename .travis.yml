@@ -16,9 +16,7 @@ before_install:
   - git fetch origin --tags
 before_script:
   - npm prune
-  - mkdir -p ./coverage
 script:
-  - npm run lint-json -s
   - npm test
 after_success:
   # Report coverage to coveralls.io

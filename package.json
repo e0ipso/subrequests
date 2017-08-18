@@ -17,7 +17,6 @@
     "flow": "flow",
     "build": "flow-remove-types src/ --out-dir lib/ && flow-copy-source src lib",
     "lint": "eslint src",
-    "lint-json": "eslint --format=json src > ./coverage/eslint.json",
     "start": "node ./exampleServer.js"
   },
   "repository": {
