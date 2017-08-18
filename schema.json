@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Subrequests format",
+  "description": "Describes the subrequests payload format.",
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/subrequest"
+  },
+  "definitions": {
+    "subrequest": {
+      "title": "Subrequest",
+      "description": "Contains all the necessary information to make the request.",
+      "type": "object",
+      "required": [
+        "action",
+        "uri"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "title": "Action",
+          "description": "The action intended for the request. Each action can resolve into a different HTTP method.",
+          "type": "string",
+          "enum": [
+            "view",
+            "create",
+            "update",
+            "replace",
+            "delete",
+            "exists",
+            "discover",
+            "noop"
+          ]
+        },
+        "uri": {
+          "title": "URI",
+          "description": "The URI where to make the subrequest.",
+          "type": "string",
+          "format": "uri"
+        },
+        "requestId": {
+          "title": "Request ID",
+          "description": "ID other requests can use to reference this request.",
+          "type": "string"
+        },
+        "body": {
+          "title": "Body",
+          "description": "The JSON encoded body payload for HTTP requests send a body.",
+          "type": "string"
+        },
+        "headers": {
+          "title": "Headers",
+          "description": "HTTP headers to be sent with the request.",
+          "type": "object",
+          "additionalProperties": true,
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          }
+        },
+        "waitFor": {
+          "title": "Parent ID",
+          "description": "ID of another request that is a dependeny for this one.",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
