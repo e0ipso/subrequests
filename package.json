@@ -61,9 +61,6 @@
     "sinon": "^2.3.6",
     "validate-commit-msg": "^2.12.2"
   },
-  "publishConfig": {
-    "access": "restricted"
-  },
   "release": {
     "analyzeCommits": "semantic-release-conventional-commits"
   }
