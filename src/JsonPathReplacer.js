@@ -149,7 +149,7 @@ module.exports = class JsonPathReplacer {
    * @param {string} serialized
    *   The contents of the serialized URI or the serialized subrequest body.
    *
-   * @returns {string}
+   * @returns {*}
    *   The unserialized member.
    *
    * @private
@@ -200,7 +200,7 @@ module.exports = class JsonPathReplacer {
     return this._findTokens(regexpSubject)
       // Then calculate the replacements we will need to return.
       .reduce((tokenReplacements: TokenReplacements, match: [string, string, string]) => {
-        // Removed the .body part at the end since we only support the body
+        // Remove the .body part at the end since we only support the body
         // replacement at this moment.
         const providedId = match[1].replace(/\.body$/, '');
         // Calculate what are the subjects to execute the JSONPath against.
