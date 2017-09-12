@@ -60,7 +60,7 @@ module.exports = {
         requestId: 'my-request',
         action: 'create',
         uri: 'test://{{req1.body@$.oof[*].id}}',
-        body: { oof: '{{reqB.body@$.lorem[*]}}' }
+        body: { oof: '{{reqB.body@$.lorem[*]}}' },
       };
       const replaced = JsonPathReplacer.replaceItem(subrequest, this.pool);
       test.deepEqual(replaced, [
@@ -68,33 +68,33 @@ module.exports = {
           requestId: 'my-request#uri{0}#body{0}',
           action: 'create',
           uri: 'test://rab',
-          body: {oof: 'ipsum'},
-          _resolved: true
+          body: { oof: 'ipsum' },
+          _resolved: true,
         },
         {
           requestId: 'my-request#uri{0}#body{1}',
           action: 'create',
           uri: 'test://rab',
-          body: {oof: 'dolor'},
-          _resolved: true
+          body: { oof: 'dolor' },
+          _resolved: true,
         },
         {
           requestId: 'my-request#uri{1}#body{0}',
           action: 'create',
           uri: 'test://zab',
-          body: {oof: 'ipsum'},
-          _resolved: true
+          body: { oof: 'ipsum' },
+          _resolved: true,
         },
         {
           requestId: 'my-request#uri{1}#body{1}',
           action: 'create',
           uri: 'test://zab',
-          body: {oof: 'dolor'},
-          _resolved: true
-        }
+          body: { oof: 'dolor' },
+          _resolved: true,
+        },
       ]);
       test.done();
-    }
+    },
   },
   _extractTokenReplacementsTest: {
     success(test) {
@@ -102,7 +102,7 @@ module.exports = {
       const subrequest = {
         action: 'create',
         uri: 'test://{{req1.body@$.foo}}',
-        body: { oof: '{{reqB.body@$.lorem[*]}}' }
+        body: { oof: '{{reqB.body@$.lorem[*]}}' },
       };
       const replacementsUri = JsonPathReplacer._extractTokenReplacements(
         subrequest,
@@ -114,8 +114,12 @@ module.exports = {
         'body',
         this.pool
       );
-      test.deepEqual(replacementsUri, new Map([[['<req1#12#4>', 0], new Map([['{{req1.body@$.foo}}', 'bar']])]]));
-      test.deepEqual(replacementsBody, new Map([[['<reqB>', 0], new Map([['{{reqB.body@$.lorem[*]}}', ['ipsum', 'dolor']]])]]));
+      test.deepEqual(replacementsUri, new Map([
+        [['<req1#12#4>', 0], new Map([['{{req1.body@$.foo}}', 'bar']])],
+      ]));
+      test.deepEqual(replacementsBody, new Map([[['<reqB>', 0], new Map([
+        ['{{reqB.body@$.lorem[*]}}', ['ipsum', 'dolor']]])],
+      ]));
       test.done();
     },
     error(test) {
@@ -132,11 +136,14 @@ module.exports = {
   },
   _validateJsonPathReplacementsTest(test) {
     test.expect(3);
-    test.doesNotThrow(() => JsonPathReplacer._validateJsonPathReplacements(['foo', 'bar']));
-    test.throws(() => JsonPathReplacer._validateJsonPathReplacements({foo: 'bar'}), 'Error');
+    test.doesNotThrow(() => JsonPathReplacer._validateJsonPathReplacements(
+      ['foo', 'bar']
+    ));
+    test.throws(() => JsonPathReplacer
+      ._validateJsonPathReplacements({ foo: 'bar' }), 'Error');
     test.throws(() => JsonPathReplacer._validateJsonPathReplacements([
       'foo',
-      { 'lorem': 'ipsum' },
+      { lorem: 'ipsum' },
       'bar',
     ]), 'Error');
     test.done();

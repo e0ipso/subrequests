@@ -30,7 +30,7 @@ module.exports = class SubrequestsManager {
   }
 
   /**
-   *
+   * Takes a batch sequence and replaces everything that needs replacing.
    *
    * @param {SubrequestsTree} tree
    *   The request tree that contains the requesting structure.
