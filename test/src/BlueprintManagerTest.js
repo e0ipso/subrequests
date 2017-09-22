@@ -12,16 +12,16 @@ module.exports = {
       let filled = BlueprintManager.fillDefaults({ body: 'true' });
       test.notEqual(typeof filled.requestId, 'undefined');
       test.deepEqual(filled.headers, {});
-      test.equal(filled.waitFor, '<ROOT>');
+      test.deepEqual(filled.waitFor, ['<ROOT>']);
       test.equal(filled.body, true);
       filled = BlueprintManager.fillDefaults({
         requestId: 'lorem',
         headers: { ipsum: 'dolor' },
-        waitFor: 'sid',
+        waitFor: ['sid'],
       });
       test.equal(filled.requestId, 'lorem');
       test.deepEqual(filled.headers, { ipsum: 'dolor' });
-      test.equal(filled.waitFor, 'sid');
+      test.deepEqual(filled.waitFor, ['sid']);
       test.equal(typeof filled.body, 'undefined');
       test.ok(!filled._resolved);
       test.done();
@@ -36,36 +36,43 @@ module.exports = {
   },
   buildExecutionSequenceTest: {
     success(test) {
-      test.expect(1);
+      test.expect(2);
       const parsed = [
         {
           requestId: '1',
-          waitFor: '<ROOT>',
+          waitFor: ['<ROOT>'],
         },
         {
           requestId: '2',
-          waitFor: '<ROOT>',
+          waitFor: ['<ROOT>'],
         },
         {
           requestId: '3',
-          waitFor: '1',
+          waitFor: ['1'],
         },
         {
           requestId: '4',
-          waitFor: '3',
+          waitFor: ['3'],
         },
         {
           requestId: '5',
-          waitFor: '2',
+          waitFor: ['2'],
         },
       ];
       const tree = BlueprintManager.buildExecutionSequence(parsed);
       const expectedTree = [
-        [{ requestId: '1', waitFor: '<ROOT>' }, { requestId: '2', waitFor: '<ROOT>' }],
-        [{ requestId: '3', waitFor: '1' }, { requestId: '5', waitFor: '2' }],
-        [{ requestId: '4', waitFor: '3' }],
+        [{ requestId: '1', waitFor: ['<ROOT>'] }, { requestId: '2', waitFor: ['<ROOT>'] }],
+        [{ requestId: '3', waitFor: ['1'] }, { requestId: '5', waitFor: ['2'] }],
+        [{ requestId: '4', waitFor: ['3'] }],
       ];
       test.deepEqual(tree, expectedTree);
+      test.throws(() => {
+        BlueprintManager.buildExecutionSequence([{
+          action: 'view',
+          uri: 'http://example.org',
+          waitFor: ['fail'],
+        }]);
+      }, Error);
       test.done();
     },
   },
@@ -76,7 +83,7 @@ module.exports = {
     test.ok(!BlueprintManager.isValidTree([
       {
         requestId: 'lorem',
-        waitFor: 'ipsum',
+        waitFor: ['ipsum'],
         uri: 'foo',
         action: 'bar',
         headers: 'moo',
@@ -85,7 +92,7 @@ module.exports = {
     test.ok(!BlueprintManager.isValidTree([
       {
         requestId: 'lorem',
-        waitFor: 'ipsum',
+        waitFor: ['ipsum'],
         uri: 'foo',
         action: 'exists',
         headers: { moo: 'bah' },
@@ -95,7 +102,7 @@ module.exports = {
     test.ok(BlueprintManager.isValidTree([
       {
         requestId: 'lorem',
-        waitFor: 'ipsum',
+        waitFor: ['ipsum'],
         uri: 'foo',
         action: 'exists',
         headers: { moo: 'bah' },
@@ -104,7 +111,7 @@ module.exports = {
     test.ok(BlueprintManager.isValidTree([
       {
         requestId: 'lorem',
-        waitFor: 'ipsum',
+        waitFor: ['ipsum'],
         uri: 'foo',
         action: 'exists',
         headers: { moo: 'bah' },
@@ -119,14 +126,14 @@ module.exports = {
       .callsFake(i => i);
     this.stubs.push(fillDefaults);
     test.throws(() => BlueprintManager.parse('lorem'), Error);
-    const userInput = '[{"action":"view","uri":"http://example.org","requestId":"1","waitFor":"<ROOT>"}]';
-    let isValidTree = sinon.stub(BlueprintManager, 'isValidTree')
+    const userInput = '[{"action":"view","uri":"http://example.org","requestId":"1","waitFor":["<ROOT>"]}]';
+    const isValidTree = sinon.stub(BlueprintManager, 'isValidTree')
       .returns(true);
     test.deepEqual(BlueprintManager.parse(userInput), [[{
       action: 'view',
       uri: 'http://example.org',
       requestId: '1',
-      waitFor: '<ROOT>',
+      waitFor: ['<ROOT>'],
     }]]);
     isValidTree.returns(false);
     this.stubs.push(isValidTree);
@@ -138,7 +145,7 @@ module.exports = {
   validateInputTest(test) {
     test.expect(4);
     test.throws(() => {
-      BlueprintManager.validateInput([{ waitFor: '<ROOT>', requestId: '1' }]);
+      BlueprintManager.validateInput([{ waitFor: ['<ROOT>'], requestId: '1' }]);
     }, Error);
     test.doesNotThrow(() => {
       BlueprintManager.validateInput([{
@@ -155,7 +162,7 @@ module.exports = {
     test.throws(() => {
       BlueprintManager.validateInput([{
         action: 'view',
-        uri: '1',
+        uri: 1,
       }]);
     }, Error);
     test.done();
