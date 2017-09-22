@@ -151,34 +151,6 @@ module.exports = {
           body: { oof: 'dolor' },
           _resolved: true,
         },
-        {
-          requestId: 'my-request#uri{2}#body{0}',
-          action: 'create',
-          uri: 'test://rab/rab/bar',
-          body: { oof: 'ipsum' },
-          _resolved: true,
-        },
-        {
-          requestId: 'my-request#uri{2}#body{1}',
-          action: 'create',
-          uri: 'test://rab/rab/bar',
-          body: { oof: 'dolor' },
-          _resolved: true,
-        },
-        {
-          requestId: 'my-request#uri{3}#body{0}',
-          action: 'create',
-          uri: 'test://zab/zab/bar',
-          body: { oof: 'ipsum' },
-          _resolved: true,
-        },
-        {
-          requestId: 'my-request#uri{3}#body{1}',
-          action: 'create',
-          uri: 'test://zab/zab/bar',
-          body: { oof: 'dolor' },
-          _resolved: true,
-        },
       ]);
       test.done();
     },

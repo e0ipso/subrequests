@@ -330,9 +330,7 @@ module.exports = class JsonPathReplacer {
     this._validateJsonPathReplacements(toReplace);
     const contentId = this._getContentId(subject);
     tokenReplacements[contentId] = tokenReplacements[contentId] || {};
-    tokenReplacements[contentId][token] = tokenReplacements[contentId][token] || [];
-    tokenReplacements[contentId][token] = tokenReplacements[contentId][token]
-      .concat(toReplace);
+    tokenReplacements[contentId][token] = toReplace;
   }
 
   /**
