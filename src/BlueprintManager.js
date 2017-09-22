@@ -56,7 +56,7 @@ module.exports = class BlueprintManager {
       rawItem.body = JSON.parse(rawItem.body);
     }
     rawItem.headers = rawItem.headers || new Map();
-    rawItem.waitFor = rawItem.waitFor || '<ROOT>';
+    rawItem.waitFor = rawItem.waitFor || ['<ROOT>'];
     rawItem._resolved = false;
 
     return rawItem;
@@ -77,20 +77,45 @@ module.exports = class BlueprintManager {
    */
   static buildExecutionSequence(parsed: Array<Subrequest>): SubrequestsTree {
     const sequence: SubrequestsTree = [
-      parsed.filter(rawItem => rawItem.waitFor === '<ROOT>'),
+      parsed.filter(({ waitFor }) => _.difference(waitFor, ['<ROOT>']).length === 0),
     ];
-    let subreqsWithUnresolvedDeps = parsed.filter(rawItem => rawItem.waitFor !== '<ROOT>');
-    let sequencePosition: number = 0;
+    let subreqsWithUnresolvedDeps = parsed.filter(
+      ({ waitFor }) => _.difference(waitFor, ['<ROOT>']).length !== 0
+    );
     // Checks if a subrequest has its dependency resolved.
-    const dependencyIsResolved = ({ waitFor }) => sequence[sequencePosition]
-      .some(({ requestId }) => requestId === waitFor);
+    // const dependencyIsResolved = ({ waitFor }) => sequence[sequencePosition]
+    //   .some(({ requestId }) => requestId === waitFor);
+    const dependencyIsResolved = ({ waitFor }, seq) =>
+      _.difference(waitFor, this._allSubrequestIds(seq)).length === 0;
     while (subreqsWithUnresolvedDeps && subreqsWithUnresolvedDeps.length) {
-      const noDeps = subreqsWithUnresolvedDeps.filter(dependencyIsResolved);
+      const noDeps = subreqsWithUnresolvedDeps.filter(
+        sub => dependencyIsResolved(sub, sequence)
+      );
+      if (noDeps.length === 0) {
+        throw new Error('Waiting for unresolvable request. Abort.');
+      }
       sequence.push(noDeps);
       subreqsWithUnresolvedDeps = _.difference(subreqsWithUnresolvedDeps, noDeps);
-      sequencePosition += 1;
     }
     return sequence;
+  }
+
+  /**
+   * Calculates all the subrequest IDs present in a tree.
+   *
+   * @param {SubrequestsTree} sequence
+   *   The subrequests in the tree.
+   *
+   * @return {string[]}
+   *   The list of subrequest IDs.
+   *
+   * @private
+   */
+  static _allSubrequestIds(sequence: SubrequestsTree): Array<string> {
+    const output = new Set(['<ROOT>']);
+    sequence.forEach(subrequests => subrequests
+      .forEach(subrequest => output.add(subrequest.requestId)));
+    return Array.from(output);
   }
 
   /**
@@ -133,7 +158,7 @@ module.exports = class BlueprintManager {
     ].reduce((all, key) => all
     && (typeof item[key] !== 'undefined')
     && typeof item.requestId === 'string'
-    && typeof item.waitFor === 'string'
+    && Array.isArray(item.waitFor)
     && typeof item.uri === 'string'
     && typeof item.headers === 'object'
     && (typeof item.body === 'undefined' || typeof item.body === 'object')
