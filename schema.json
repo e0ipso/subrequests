@@ -34,8 +34,7 @@
         "uri": {
           "title": "URI",
           "description": "The URI where to make the subrequest.",
-          "type": "string",
-          "format": "uri"
+          "type": "string"
         },
         "requestId": {
           "title": "Request ID",
@@ -60,8 +59,12 @@
         },
         "waitFor": {
           "title": "Parent ID",
-          "description": "ID of another request that is a dependeny for this one.",
-          "type": "string"
+          "description": "ID of other requests that this request depends on.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "ID of another request that is a dependency for this one."
+          }
         }
       }
     }
