@@ -14,8 +14,12 @@ module.exports = {
       },
       {
         body: '{"lorem":["ipsum","dolor"]}',
-        headers: new Map([['Content-ID', '<reqB>']]),
-      }
+        headers: new Map([['Content-ID', '<reqB#0>']]),
+      },
+      {
+        body: '{"rab":["success!","yay!"],"zab":"success!"}',
+        headers: new Map([['Content-ID', '<reqIII>']]),
+      },
     ];
     cb();
   },
@@ -34,7 +38,7 @@ module.exports = {
       this.stubs.push(sinon.stub(JsonPathReplacer, '_extractTokenReplacements'));
       JsonPathReplacer._extractTokenReplacements.callsFake(() => new Map());
       const replaced = JsonPathReplacer.replaceItem({ foo: 'bar' });
-      test.deepEqual(replaced, [ { foo: 'bar', _resolved: true } ]);
+      test.deepEqual(replaced, [{ foo: 'bar', _resolved: true }]);
       test.ok(JsonPathReplacer._extractTokenReplacements.calledTwice);
       test.done();
     },
@@ -50,8 +54,63 @@ module.exports = {
         _resolved: true,
         action: 'view',
         uri: 'test://bar',
-        requestId: 'my-request#uri{0}'
+        requestId: 'my-request#uri{0}',
       }]);
+      test.done();
+    },
+    manyOtherReplacements(test) {
+      test.expect(1);
+      const subrequest = {
+        requestId: 'my-request',
+        action: 'create',
+        uri: 'test',
+        body: { merol: '{{reqB.body@$.lorem[*]}}', oof: '{{reqB.body@$.foo}}' },
+      };
+      const pool = [{
+        body: '{"lorem":["ipsum","dolor"],"foo":"bar"}',
+        headers: new Map([['Content-ID', '<reqB#0>']]),
+      }, {
+        body: '{"lorem":["2nd-ipsum","2nd-dolor","2nd-sid"],"foo":"rab"}',
+        headers: new Map([['Content-ID', '<reqB#1>']]),
+      }];
+      const replaced = JsonPathReplacer.replaceItem(subrequest, pool);
+      test.deepEqual(replaced, [
+        {
+          requestId: 'my-request#body{0}',
+          action: 'create',
+          uri: 'test',
+          body: { merol: 'ipsum', oof: 'bar' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#body{1}',
+          action: 'create',
+          uri: 'test',
+          body: { merol: 'dolor', oof: 'bar' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#body{0}',
+          action: 'create',
+          uri: 'test',
+          body: { merol: '2nd-ipsum', oof: 'rab' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#body{1}',
+          action: 'create',
+          uri: 'test',
+          body: { merol: '2nd-dolor', oof: 'rab' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#body{2}',
+          action: 'create',
+          uri: 'test',
+          body: { merol: '2nd-sid', oof: 'rab' },
+          _resolved: true,
+        },
+      ]);
       test.done();
     },
     manyReplacements(test) {
@@ -59,7 +118,7 @@ module.exports = {
       const subrequest = {
         requestId: 'my-request',
         action: 'create',
-        uri: 'test://{{req1.body@$.oof[*].id}}',
+        uri: 'test://{{req1.body@$.oof[*].id}}/{{req1.body@$.oof[*].id}}/{{req1.body@$.foo}}',
         body: { oof: '{{reqB.body@$.lorem[*]}}' },
       };
       const replaced = JsonPathReplacer.replaceItem(subrequest, this.pool);
@@ -67,28 +126,56 @@ module.exports = {
         {
           requestId: 'my-request#uri{0}#body{0}',
           action: 'create',
-          uri: 'test://rab',
+          uri: 'test://rab/rab/bar',
           body: { oof: 'ipsum' },
           _resolved: true,
         },
         {
           requestId: 'my-request#uri{0}#body{1}',
           action: 'create',
-          uri: 'test://rab',
+          uri: 'test://rab/rab/bar',
           body: { oof: 'dolor' },
           _resolved: true,
         },
         {
           requestId: 'my-request#uri{1}#body{0}',
           action: 'create',
-          uri: 'test://zab',
+          uri: 'test://zab/zab/bar',
           body: { oof: 'ipsum' },
           _resolved: true,
         },
         {
           requestId: 'my-request#uri{1}#body{1}',
           action: 'create',
-          uri: 'test://zab',
+          uri: 'test://zab/zab/bar',
+          body: { oof: 'dolor' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#uri{2}#body{0}',
+          action: 'create',
+          uri: 'test://rab/rab/bar',
+          body: { oof: 'ipsum' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#uri{2}#body{1}',
+          action: 'create',
+          uri: 'test://rab/rab/bar',
+          body: { oof: 'dolor' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#uri{3}#body{0}',
+          action: 'create',
+          uri: 'test://zab/zab/bar',
+          body: { oof: 'ipsum' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#uri{3}#body{1}',
+          action: 'create',
+          uri: 'test://zab/zab/bar',
           body: { oof: 'dolor' },
           _resolved: true,
         },
@@ -114,12 +201,12 @@ module.exports = {
         'body',
         this.pool
       );
-      test.deepEqual(replacementsUri, new Map([
-        [['<req1#12#4>', 0], new Map([['{{req1.body@$.foo}}', 'bar']])],
-      ]));
-      test.deepEqual(replacementsBody, new Map([[['<reqB>', 0], new Map([
-        ['{{reqB.body@$.lorem[*]}}', ['ipsum', 'dolor']]])],
-      ]));
+      test.deepEqual(replacementsUri, {
+        'req1#12#4': { '{{req1.body@$.foo}}': ['bar'] },
+      });
+      test.deepEqual(replacementsBody, {
+        'reqB#0': { '{{reqB.body@$.lorem[*]}}': ['ipsum', 'dolor'] },
+      });
       test.done();
     },
     error(test) {
@@ -132,7 +219,7 @@ module.exports = {
         JsonPathReplacer._extractTokenReplacements(subrequest, 'uri', this.pool);
       }, 'Error');
       test.done();
-    }
+    },
   },
   _validateJsonPathReplacementsTest(test) {
     test.expect(3);
@@ -155,5 +242,5 @@ module.exports = {
     headers = new Map();
     test.equal(JsonPathReplacer._getContentId({ headers }), '');
     test.done();
-  }
+  },
 };

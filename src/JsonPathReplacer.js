@@ -1,7 +1,7 @@
 // @flow
 
 import type { Subrequest } from '../types/BlueprintManager';
-import type { TokenReplacements } from '../types/JsonPathReplacer';
+import type { TokenReplacements, Point } from '../types/JsonPathReplacer';
 import type { Response } from '../types/Responses';
 
 const _ = require('lodash');
@@ -60,13 +60,13 @@ module.exports = class JsonPathReplacer {
       uri: this._extractTokenReplacements(subrequest, 'uri', pool),
       body: this._extractTokenReplacements(subrequest, 'body', pool),
     };
-    if (tokenReplacements.uri.size !== 0) {
+    if (Object.keys(tokenReplacements.uri).length !== 0) {
       return this.replaceBatch(
         this._doReplaceTokensInLocation(tokenReplacements, subrequest, 'uri'),
         pool
       );
     }
-    if (tokenReplacements.body.size !== 0) {
+    if (Object.keys(tokenReplacements.body).length !== 0) {
       return this.replaceBatch(
         this._doReplaceTokensInLocation(tokenReplacements, subrequest, 'body'),
         pool
@@ -97,22 +97,100 @@ module.exports = class JsonPathReplacer {
     tokenizedSubrequest: Subrequest,
     tokenLocation: ('uri' | 'body')
   ): Array<Subrequest> {
-    let index = 0;
     const replacements: Array<Subrequest> = [];
-    tokenReplacements[tokenLocation].forEach((tokens: Map<string, string>) => {
-      // Clone the subrequest.
-      const cloned: Subrequest = _.cloneDeep(tokenizedSubrequest);
-      cloned.requestId = `${cloned.requestId}#${tokenLocation}{${index}}`;
-      index += 1;
-      // Now replace all the tokens in the request member (body or URI).
-      let tokenSubject = this._serializeMember(tokenLocation, cloned[tokenLocation]);
-      tokens.forEach((value, token) => {
-        tokenSubject = tokenSubject.replace(token, value);
+    const tokensPerContentId = tokenReplacements[tokenLocation];
+    const contentIds = Object.keys(tokensPerContentId);
+    contentIds.forEach((contentId) => {
+      const replacementsPerToken = tokensPerContentId[contentId];
+      const points = this._getPoints(tokensPerContentId[contentId]);
+      let index = 0;
+      points.forEach((point) => {
+        // Clone the subrequest.
+        const cloned = _.cloneDeep(tokenizedSubrequest);
+        cloned.requestId = `${tokenizedSubrequest.requestId}#${tokenLocation}{${index}}`;
+        index += 1;
+        // Now replace all the tokens in the request member (body or URI).
+        const replacementsForPoint = Object.keys(replacementsPerToken)
+          .map((token, tokenIndex) => ({
+            token,
+            value: replacementsPerToken[token][point[tokenIndex]],
+          }));
+        let tokenSubject = this._serializeMember(tokenLocation, cloned[tokenLocation]);
+        replacementsForPoint.forEach((replacementForPoint) => {
+          // Do all the different replacements on the same subject.
+          tokenSubject = this._replaceTokenSubject(
+            replacementForPoint.token,
+            replacementForPoint.value,
+            tokenSubject
+          );
+        });
+        cloned[tokenLocation] = this._deserializeMember(tokenLocation, tokenSubject);
+        replacements.push(cloned);
       });
-      cloned[tokenLocation] = this._deserializeMember(tokenLocation, tokenSubject);
-      replacements.push(cloned);
     });
     return replacements;
+  }
+
+  /**
+   * Does the replacement on the token subject.
+   *
+   * @param {string} token
+   *   The thing to replace.
+   * @param {string} value
+   *   The thing to replace it with.
+   * @param {int} tokenSubject
+   *   The thing to replace it on.
+   *
+   * @returns {string}
+   *   The replaced string.
+   *
+   * @private
+   */
+  static _replaceTokenSubject(
+    token: string,
+    value: string,
+    tokenSubject: string
+  ): string {
+    // Escape regular expression.
+    const regexp = new RegExp(token.replace(/([.*+?^=!:${}()|[\]/\\])/g, '\\$1'), 'g');
+    return tokenSubject.replace(regexp, value);
+  }
+
+  /**
+   * Generates a list of sets of coordinates for the token replacements.
+   *
+   * Each point (coordinates set) end up creating a new clone of the tokenized
+   * subrequest.
+   *
+   * @param {Object<string, Array>} replacementsPerToken
+   *   Array of replacements keyed by token.
+   *
+   * @return {Array<Point>}
+   *   The coordinates sets.
+   */
+  static _getPoints(replacementsPerToken: {[string]: Array<string>}): Array<Point> {
+    const indicesMatrix: Array<Array<number>> = Object.keys(replacementsPerToken)
+      .reduce((carry, token) => {
+        const replacements = replacementsPerToken[token];
+        carry.push(replacements.map((replacement, index) => index));
+        return carry;
+      }, []);
+    let points = [];
+    indicesMatrix.forEach((current) => {
+      const newPoints = [];
+      current.forEach((index) => {
+        if (points.length === 0) {
+          newPoints.push([index]);
+        }
+        else {
+          points.forEach((coordinateSet) => {
+            newPoints.push([...coordinateSet, index]);
+          });
+        }
+      });
+      points = newPoints;
+    });
+    return points;
   }
 
   /**
@@ -222,7 +300,7 @@ module.exports = class JsonPathReplacer {
         ));
 
         return tokenReplacements;
-      }, new Map());
+      }, {});
   }
 
   /**
@@ -246,26 +324,15 @@ module.exports = class JsonPathReplacer {
   ): void {
     // jsonpath.query always returns an array of matches.
     const toReplace = jsonpath.query(JSON.parse(subject.body), match[2]);
+    const token = match[0];
     // The replacements need to be strings. If not, then the replacement
     // is not valid.
     this._validateJsonPathReplacements(toReplace);
-    // Place all the replacement items in the tokenReplacements.
-    toReplace.forEach((replacementTokenValue, index) => {
-      // Set the match for the Response ID + match item.
-      const idTuple = [
-        // The subject content ID. It contains the # fragment so we get
-        // one per each possible subject.
-        this._getContentId(subject),
-        index,
-      ];
-      const replacementsForItem = tokenReplacements.get(idTuple) || new Map();
-      replacementsForItem.set(
-        // The whole match string to be replaced.
-        match[0],
-        replacementTokenValue
-      );
-      tokenReplacements.set(idTuple, replacementsForItem);
-    });
+    const contentId = this._getContentId(subject);
+    tokenReplacements[contentId] = tokenReplacements[contentId] || {};
+    tokenReplacements[contentId][token] = tokenReplacements[contentId][token] || [];
+    tokenReplacements[contentId][token] = tokenReplacements[contentId][token]
+      .concat(toReplace);
   }
 
   /**
