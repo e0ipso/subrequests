@@ -6,4 +6,7 @@ export type TokenReplacements = {
   }
 };
 export type TokenReplacementsTree = Map<string, Map<number, Map<string, string>>>;
-export type Point = Array<number>;
+export type Point = Array<{
+  token: string,
+  value: string,
+}>;
