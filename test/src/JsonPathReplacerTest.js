@@ -58,6 +58,110 @@ module.exports = {
       }]);
       test.done();
     },
+    severalReplacements(test) {
+      test.expect(1);
+      const subrequest = {
+        uri: '/ipsum/{{foo.body@$.things[*]}}/{{bar.body@$.things[*]}}',
+        action: 'sing',
+        requestId: 'oop',
+        headers: [],
+        _resolved: false,
+        body: { answer: '{{foo.body@$.stuff}}' },
+        waitFor: ['foo'],
+      };
+      const pool = [{
+        body: '{"things":["what","keep","talking"],"stuff":42}',
+        headers: new Map([['Content-ID', '<foo>']]),
+      }, {
+        body: '{"things":["the","plane","is"],"stuff":"delayed"}',
+        headers: new Map([['Content-ID', '<bar>']]),
+      }];
+      const replaced = JsonPathReplacer.replaceItem(subrequest, pool);
+      test.deepEqual(replaced, [
+        {
+          uri: '/ipsum/what/the',
+          action: 'sing',
+          requestId: 'oop#uri{0}#body{0}',
+          headers: [],
+          _resolved: true,
+          body: { answer: '42' },
+          waitFor: ['foo'],
+        },
+        {
+          uri: '/ipsum/what/plane',
+          action: 'sing',
+          requestId: 'oop#uri{1}#body{0}',
+          headers: [],
+          _resolved: true,
+          body: { answer: '42' },
+          waitFor: ['foo'],
+        },
+        {
+          uri: '/ipsum/what/is',
+          action: 'sing',
+          requestId: 'oop#uri{2}#body{0}',
+          headers: [],
+          _resolved: true,
+          body: { answer: '42' },
+          waitFor: ['foo'],
+        },
+        {
+          uri: '/ipsum/keep/the',
+          action: 'sing',
+          requestId: 'oop#uri{3}#body{0}',
+          headers: [],
+          _resolved: true,
+          body: { answer: '42' },
+          waitFor: ['foo'],
+        },
+        {
+          uri: '/ipsum/keep/plane',
+          action: 'sing',
+          requestId: 'oop#uri{4}#body{0}',
+          headers: [],
+          _resolved: true,
+          body: { answer: '42' },
+          waitFor: ['foo'],
+        },
+        {
+          uri: '/ipsum/keep/is',
+          action: 'sing',
+          requestId: 'oop#uri{5}#body{0}',
+          headers: [],
+          _resolved: true,
+          body: { answer: '42' },
+          waitFor: ['foo'],
+        },
+        {
+          uri: '/ipsum/talking/the',
+          action: 'sing',
+          requestId: 'oop#uri{6}#body{0}',
+          headers: [],
+          _resolved: true,
+          body: { answer: '42' },
+          waitFor: ['foo'],
+        },
+        {
+          uri: '/ipsum/talking/plane',
+          action: 'sing',
+          requestId: 'oop#uri{7}#body{0}',
+          headers: [],
+          _resolved: true,
+          body: { answer: '42' },
+          waitFor: ['foo'],
+        },
+        {
+          uri: '/ipsum/talking/is',
+          action: 'sing',
+          requestId: 'oop#uri{8}#body{0}',
+          headers: [],
+          _resolved: true,
+          body: { answer: '42' },
+          waitFor: ['foo'],
+        },
+      ]);
+      test.done();
+    },
     manyOtherReplacements(test) {
       test.expect(1);
       const subrequest = {
@@ -86,25 +190,60 @@ module.exports = {
           requestId: 'my-request#body{1}',
           action: 'create',
           uri: 'test',
+          body: { merol: 'ipsum', oof: 'rab' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#body{2}',
+          action: 'create',
+          uri: 'test',
           body: { merol: 'dolor', oof: 'bar' },
           _resolved: true,
         },
         {
-          requestId: 'my-request#body{0}',
+          requestId: 'my-request#body{3}',
+          action: 'create',
+          uri: 'test',
+          body: { merol: 'dolor', oof: 'rab' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#body{4}',
+          action: 'create',
+          uri: 'test',
+          body: { merol: '2nd-ipsum', oof: 'bar' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#body{5}',
           action: 'create',
           uri: 'test',
           body: { merol: '2nd-ipsum', oof: 'rab' },
           _resolved: true,
         },
         {
-          requestId: 'my-request#body{1}',
+          requestId: 'my-request#body{6}',
+          action: 'create',
+          uri: 'test',
+          body: { merol: '2nd-dolor', oof: 'bar' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#body{7}',
           action: 'create',
           uri: 'test',
           body: { merol: '2nd-dolor', oof: 'rab' },
           _resolved: true,
         },
         {
-          requestId: 'my-request#body{2}',
+          requestId: 'my-request#body{8}',
+          action: 'create',
+          uri: 'test',
+          body: { merol: '2nd-sid', oof: 'bar' },
+          _resolved: true,
+        },
+        {
+          requestId: 'my-request#body{9}',
           action: 'create',
           uri: 'test',
           body: { merol: '2nd-sid', oof: 'rab' },
@@ -174,10 +313,10 @@ module.exports = {
         this.pool
       );
       test.deepEqual(replacementsUri, {
-        'req1#12#4': { '{{req1.body@$.foo}}': ['bar'] },
+        req1: { '{{req1.body@$.foo}}': ['bar'] },
       });
       test.deepEqual(replacementsBody, {
-        'reqB#0': { '{{reqB.body@$.lorem[*]}}': ['ipsum', 'dolor'] },
+        reqB: { '{{reqB.body@$.lorem[*]}}': ['ipsum', 'dolor'] },
       });
       test.done();
     },

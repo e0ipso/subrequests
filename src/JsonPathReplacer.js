@@ -99,34 +99,35 @@ module.exports = class JsonPathReplacer {
   ): Array<Subrequest> {
     const replacements: Array<Subrequest> = [];
     const tokensPerContentId = tokenReplacements[tokenLocation];
-    const contentIds = Object.keys(tokensPerContentId);
-    contentIds.forEach((contentId) => {
-      const replacementsPerToken = tokensPerContentId[contentId];
-      const points = this._getPoints(tokensPerContentId[contentId]);
-      let index = 0;
-      points.forEach((point) => {
-        // Clone the subrequest.
-        const cloned = _.cloneDeep(tokenizedSubrequest);
-        cloned.requestId = `${tokenizedSubrequest.requestId}#${tokenLocation}{${index}}`;
-        index += 1;
-        // Now replace all the tokens in the request member (body or URI).
-        const replacementsForPoint = Object.keys(replacementsPerToken)
-          .map((token, tokenIndex) => ({
-            token,
-            value: replacementsPerToken[token][point[tokenIndex]],
-          }));
-        let tokenSubject = this._serializeMember(tokenLocation, cloned[tokenLocation]);
-        replacementsForPoint.forEach((replacementForPoint) => {
-          // Do all the different replacements on the same subject.
-          tokenSubject = this._replaceTokenSubject(
-            replacementForPoint.token,
-            replacementForPoint.value,
-            tokenSubject
-          );
-        });
-        cloned[tokenLocation] = this._deserializeMember(tokenLocation, tokenSubject);
-        replacements.push(cloned);
+    let index = 0;
+    // First figure out the different token resolutions and their token.
+    const groupedByToken = [];
+    Object.keys(tokensPerContentId).forEach((contentId) => {
+      const resolutionsPerToken = tokensPerContentId[contentId];
+      Object.keys(resolutionsPerToken).forEach((token) => {
+        const resolutions = resolutionsPerToken[token];
+        groupedByToken.push(resolutions.map(value => ({ token, value })));
       });
+    });
+    // Then calculate the points.
+    const points = this._getPoints(groupedByToken);
+    points.forEach((point) => {
+      // Clone the subrequest.
+      const cloned = _.cloneDeep(tokenizedSubrequest);
+      cloned.requestId = `${tokenizedSubrequest.requestId}#${tokenLocation}{${index}}`;
+      index += 1;
+      // Now replace all the tokens in the request member.
+      let tokenSubject = this._serializeMember(tokenLocation, cloned[tokenLocation]);
+      point.forEach((replacement) => {
+        // Do all the different replacements on the same subject.
+        tokenSubject = this._replaceTokenSubject(
+          replacement.token,
+          replacement.value,
+          tokenSubject
+        );
+      });
+      cloned[tokenLocation] = this._deserializeMember(tokenLocation, tokenSubject);
+      replacements.push(cloned);
     });
     return replacements;
   }
@@ -162,33 +163,30 @@ module.exports = class JsonPathReplacer {
    * Each point (coordinates set) end up creating a new clone of the tokenized
    * subrequest.
    *
-   * @param {Object<string, Array>} replacementsPerToken
+   * @param {Array<Array<Object>>} groupedByToken
    *   Array of replacements keyed by token.
    *
    * @return {Array<Point>}
    *   The coordinates sets.
    */
-  static _getPoints(replacementsPerToken: {[string]: Array<string>}): Array<Point> {
-    const indicesMatrix: Array<Array<number>> = Object.keys(replacementsPerToken)
-      .reduce((carry, token) => {
-        const replacements = replacementsPerToken[token];
-        carry.push(replacements.map((replacement, index) => index));
-        return carry;
-      }, []);
-    let points = [];
-    indicesMatrix.forEach((current) => {
-      const newPoints = [];
-      current.forEach((index) => {
-        if (points.length === 0) {
-          newPoints.push([index]);
-        }
-        else {
-          points.forEach((coordinateSet) => {
-            newPoints.push([...coordinateSet, index]);
-          });
-        }
+  static _getPoints(groupedByToken: Array<Array<{
+    token: string,
+    value: string,
+  }>>): Array<Point> {
+    const currentGroup = groupedByToken[0];
+    // If this is not the last group, then call recursively.
+    if (groupedByToken.length === 1) {
+      return currentGroup.map(item => [item]);
+    }
+    const remaining = groupedByToken.slice(1);
+    const points = [];
+    currentGroup.forEach((resolutionInfo) => {
+      // Get all the combinations for the next groups.
+      const nextPoints = this._getPoints(remaining);
+      nextPoints.forEach((nextPoint) => {
+        // Prepend the current resolution for each point.
+        points.push([resolutionInfo].concat(nextPoint));
       });
-      points = newPoints;
     });
     return points;
   }
@@ -275,7 +273,7 @@ module.exports = class JsonPathReplacer {
       : subrequest[tokenLocation];
     // First find all the replacements to do. Use a regular expression to detect
     // cases like "…{{req1.body@$.data.attributes.seasons..id}}…"
-    return this._findTokens(regexpSubject)
+    return _.uniqBy(this._findTokens(regexpSubject), '0')
       // Then calculate the replacements we will need to return.
       .reduce((tokenReplacements: TokenReplacements, match: [string, string, string]) => {
         // Remove the .body part at the end since we only support the body
@@ -296,6 +294,7 @@ module.exports = class JsonPathReplacer {
         subjects.forEach(subject => this._addReplacementsForSubject(
           match,
           subject,
+          providedId,
           tokenReplacements
         ));
 
@@ -310,6 +309,8 @@ module.exports = class JsonPathReplacer {
    *   The structured replacement token.
    * @param {Response} subject
    *   The response object the token refers to.
+   * @param {string} providedId
+   *   The Content ID without the # variations.
    * @param {TokenReplacements} tokenReplacements
    *   The accumulated replacements.
    *
@@ -320,6 +321,7 @@ module.exports = class JsonPathReplacer {
   static _addReplacementsForSubject(
     match: [string, string, string],
     subject: Response,
+    providedId: string,
     tokenReplacements: TokenReplacements
   ): void {
     // jsonpath.query always returns an array of matches.
@@ -328,9 +330,9 @@ module.exports = class JsonPathReplacer {
     // The replacements need to be strings. If not, then the replacement
     // is not valid.
     this._validateJsonPathReplacements(toReplace);
-    const contentId = this._getContentId(subject);
-    tokenReplacements[contentId] = tokenReplacements[contentId] || {};
-    tokenReplacements[contentId][token] = toReplace;
+    tokenReplacements[providedId] = tokenReplacements[providedId] || {};
+    tokenReplacements[providedId][token] = tokenReplacements[providedId][token] || [];
+    tokenReplacements[providedId][token] = tokenReplacements[providedId][token].concat(toReplace);
   }
 
   /**
@@ -374,8 +376,13 @@ module.exports = class JsonPathReplacer {
   static _validateJsonPathReplacements(toReplace: Array<*>): void {
     // Check that all the elements in the array are strings.
     const isValid = Array.isArray(toReplace)
-      && toReplace.reduce((isString, item) =>
-        isString && (typeof item === 'string' || item instanceof String), true);
+      && toReplace.reduce((valid, item) =>
+        valid && (
+          typeof item === 'string' ||
+          item instanceof String ||
+          typeof item === 'number' ||
+          item instanceof Number
+        ), true);
     if (!isValid) {
       throw new Error(`The replacement token did not a list of strings. Instead it found  ${JSON.stringify(toReplace)}.`);
     }
