@@ -8,12 +8,16 @@ const sinon = require('sinon');
 module.exports = {
   fillDefaultsTest: {
     success(test) {
-      test.expect(9);
-      let filled = BlueprintManager.fillDefaults({ body: 'true' });
+      test.expect(10);
+      let filled = BlueprintManager.fillDefaults({
+        body: 'true',
+        uri: 'http://example.org?query=%7B%7Bfoo%40bar%7D%7D&lorem',
+      });
       test.notEqual(typeof filled.requestId, 'undefined');
       test.deepEqual(filled.headers, {});
       test.deepEqual(filled.waitFor, ['<ROOT>']);
       test.equal(filled.body, true);
+      test.equal(filled.uri, 'http://example.org?query={{foo@bar}}&lorem');
       filled = BlueprintManager.fillDefaults({
         requestId: 'lorem',
         headers: { ipsum: 'dolor' },
