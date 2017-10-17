@@ -58,6 +58,14 @@ module.exports = class BlueprintManager {
     rawItem.headers = rawItem.headers || new Map();
     rawItem.waitFor = rawItem.waitFor || ['<ROOT>'];
     rawItem._resolved = false;
+    // Detect if there is an encoded token. If so, then decode the URI.
+    if (
+      rawItem.uri &&
+      rawItem.uri.indexOf('%7B%7B') !== -1 &&
+      rawItem.uri.indexOf('%7D%7D') !== -1
+    ) {
+      rawItem.uri = decodeURIComponent(rawItem.uri);
+    }
 
     return rawItem;
   }
