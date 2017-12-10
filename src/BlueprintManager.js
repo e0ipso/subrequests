@@ -55,7 +55,11 @@ module.exports = class BlueprintManager {
     if (typeof rawItem.body !== 'undefined') {
       rawItem.body = JSON.parse(rawItem.body);
     }
-    rawItem.headers = rawItem.headers || new Map();
+    const headersObject = rawItem.headers || {};
+    rawItem.headers = Object.keys(headersObject).reduce((carry, key) => {
+      carry.set(key, headersObject[key]);
+      return carry;
+    }, new Map());
     rawItem.waitFor = rawItem.waitFor || ['<ROOT>'];
     rawItem._resolved = false;
     // Detect if there is an encoded token. If so, then decode the URI.
@@ -87,18 +91,16 @@ module.exports = class BlueprintManager {
     const sequence: SubrequestsTree = [
       parsed.filter(({ waitFor }) => _.difference(waitFor, ['<ROOT>']).length === 0),
     ];
-    let subreqsWithUnresolvedDeps = parsed.filter(
-      ({ waitFor }) => _.difference(waitFor, ['<ROOT>']).length !== 0
-    );
+    let subreqsWithUnresolvedDeps = parsed.filter(({ waitFor }) =>
+      _.difference(waitFor, ['<ROOT>']).length !== 0);
     // Checks if a subrequest has its dependency resolved.
     // const dependencyIsResolved = ({ waitFor }) => sequence[sequencePosition]
     //   .some(({ requestId }) => requestId === waitFor);
     const dependencyIsResolved = ({ waitFor }, seq) =>
       _.difference(waitFor, this._allSubrequestIds(seq)).length === 0;
     while (subreqsWithUnresolvedDeps && subreqsWithUnresolvedDeps.length) {
-      const noDeps = subreqsWithUnresolvedDeps.filter(
-        sub => dependencyIsResolved(sub, sequence)
-      );
+      const noDeps = subreqsWithUnresolvedDeps.filter(sub =>
+        dependencyIsResolved(sub, sequence));
       if (noDeps.length === 0) {
         throw new Error('Waiting for unresolvable request. Abort.');
       }
