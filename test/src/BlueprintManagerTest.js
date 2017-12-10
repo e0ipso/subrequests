@@ -24,7 +24,7 @@ module.exports = {
         waitFor: ['sid'],
       });
       test.equal(filled.requestId, 'lorem');
-      test.deepEqual(filled.headers, { ipsum: 'dolor' });
+      test.deepEqual(filled.headers, new Map([['ipsum', 'dolor']]));
       test.deepEqual(filled.waitFor, ['sid']);
       test.equal(typeof filled.body, 'undefined');
       test.ok(!filled._resolved);

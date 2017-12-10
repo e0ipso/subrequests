@@ -106,8 +106,7 @@ module.exports = class HttpRequestor implements RequestorInterface {
   translateResponseFromLibFormat(response: *): Response {
     // Translate the headers from an object to a Map.
     const headers = new Map(Object.keys(response.headers)
-      .map(name => [name, response.headers[name]])
-    );
+      .map(name => [name, response.headers[name]]));
     return { headers, body: response.body };
   }
 
