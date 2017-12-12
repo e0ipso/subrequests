@@ -348,7 +348,7 @@ module.exports = class JsonPathReplacer {
    * @private
    */
   static _findTokens(subject: string): Array<[string, string, string]> {
-    const regexp = new RegExp('\\{\\{\([^\\{\\{]*\)@\([^\\{\\{]*\)\\}\\}', 'gmu'); // eslint-disable-line no-useless-escape
+    const regexp = new RegExp('\\{\\{\([^\\{\\{@]*\)@\([^\\{\\{]*\)\\}\\}', 'gmu'); // eslint-disable-line no-useless-escape
     const matches = [];
     let match = regexp.exec(subject);
     while (match) {
