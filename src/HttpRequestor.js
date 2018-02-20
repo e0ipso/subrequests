@@ -31,9 +31,7 @@ module.exports = class HttpRequestor implements RequestorInterface {
   requestInParallel(subrequests: Array<Subrequest>): Array<Promise<Response>> {
     return subrequests.map((subrequest) => {
       // Build the request options.
-      const parts = subrequest.uri.split('?');
-      const uri = parts[0];
-      const qs = querystring.parse(parts[1] || '');
+      const { uri, qs } = this._parseQueryString(subrequest.uri);
       const options: Object = {
         // Add a custom request header to identify the subrequest.
         headers: { 'x-subrequest-id': subrequest.requestId },
@@ -53,6 +51,23 @@ module.exports = class HttpRequestor implements RequestorInterface {
       const method = this.constructor._actionToMethod(subrequest.action).toLowerCase();
       return this._individualRequest(method, uri, options, subrequest.requestId);
     });
+  }
+
+  /**
+   * Parses the query string and returns the uri and query object.
+   *
+   * @param {string} uri
+   *   The URI with query string encoded.
+   *
+   * @return {{uri: string, qs: *}}
+   *   The query string and URI.
+   *
+   * @protected
+   */
+  _parseQueryString(uri: string) {
+    const parts = uri.split('?');
+    const qs = querystring.parse(parts[1] || '');
+    return { uri: parts[0], qs };
   }
 
   /**
