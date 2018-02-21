@@ -1,6 +1,6 @@
 {
   "name": "subrequests",
-  "version": "2.7.3",
+  "version": "0.0.0-development",
   "description": "Make many requests in one go.",
   "main": "lib/index.js",
   "directories": {
@@ -12,7 +12,7 @@
     "commitmsg": "validate-commit-msg",
     "precommit": "npm run flow && npm run lint",
     "prepush": "npm test && npm run coverage",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
+    "semantic-release": "semantic-release",
     "postinstall": "npm run build",
     "flow": "flow",
     "build": "flow-remove-types src/ --out-dir lib/ && flow-copy-source src lib",
@@ -56,10 +56,12 @@
     "husky": "^0.14.2",
     "istanbul": "^0.4.5",
     "nodeunit": "^0.11.1",
-    "semantic-release": "^12.2.2",
-    "semantic-release-conventional-commits": "^1.0.2",
     "sinon": "^4.2.2",
     "validate-commit-msg": "^2.12.2"
+  },
+  "optionalDependencies": {
+    "semantic-release": "^12.4.1",
+    "semantic-release-conventional-commits": "^2.0.0"
   },
   "release": {
     "analyzeCommits": "semantic-release-conventional-commits"
