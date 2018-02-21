@@ -19,8 +19,8 @@ jobs:
       stage: test
       node_js: 'lts/boron'
       script:
-        - npm run lint
-        - npm test
+        - yarn lint
+        - yarn test
       after_success:
         # Report coverage to coveralls.io
         - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
@@ -30,12 +30,12 @@ jobs:
       stage: test
       node_js: 'lts/carbon'
       script:
-        - npm run lint
-        - npm test
+        - yarn lint
+        - yarn test
 
     -
       stage: deploy
       if: branch = master
       # Semantic release will fail if it's not using node 8.
       node_js: 'lts/carbon'
-      script: npm run semantic-release
+      script: yarn semantic-release
