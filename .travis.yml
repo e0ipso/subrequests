@@ -18,9 +18,11 @@ jobs:
     -
       stage: test
       node_js: 'lts/boron'
+      # Semantic Release is not used, however it fails the build due to requiring >=8.3.
+      install: yarn --ignore-engines
       script:
-        - npm run lint
-        - npm test
+        - yarn lint
+        - yarn test
       after_success:
         # Report coverage to coveralls.io
         - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
@@ -30,12 +32,12 @@ jobs:
       stage: test
       node_js: 'lts/carbon'
       script:
-        - npm run lint
-        - npm test
+        - yarn lint
+        - yarn test
 
     -
       stage: deploy
       if: branch = master
       # Semantic release will fail if it's not using node 8.
       node_js: 'lts/carbon'
-      script: npm run semantic-release
+      script: yarn semantic-release

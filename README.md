@@ -15,6 +15,12 @@
 npm install --save subrequests
 ```
 
+or
+
+```
+yarn add subrequests
+```
+
 ## Usage
 
 ### On the Server
