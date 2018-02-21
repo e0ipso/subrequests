@@ -18,6 +18,8 @@ jobs:
     -
       stage: test
       node_js: 'lts/boron'
+      # Semantic Release is not used, however it fails the build due to requiring >=8.3.
+      install: yarn --ignore-engines
       script:
         - yarn lint
         - yarn test
