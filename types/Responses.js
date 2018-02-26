@@ -5,7 +5,9 @@ export type Response = {
   headers: Map<string, string>,
 };
 
-export interface ResponseMergerInterface {
+export interface ResponseMergerInterface {}
+
+export interface ResponseMergerStaticsInterface {
 
   /**
    * Merges many responses into a single one.
@@ -16,7 +18,7 @@ export interface ResponseMergerInterface {
    * @return {Response}
    *   A single response containing all the responses.
    */
-  static mergeResponses(responses: Array<Response>): Response;
+  mergeResponses(responses: Array<Response>): Response;
 
   /**
    * Builds a subresponse object based on the response to the subrequest.
@@ -29,6 +31,6 @@ export interface ResponseMergerInterface {
    *
    *  @private
    */
-  static serializeResponse(response: Response): string;
+  serializeResponse(response: Response): string;
 
 }

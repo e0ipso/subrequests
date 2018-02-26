@@ -1,6 +1,6 @@
 // @flow
 
-import type { Response, ResponseMergerInterface } from '../types/Responses';
+import type { Response, ResponseMergerStaticsInterface } from '../types/Responses';
 
 const contentType = require('content-type');
 const ResponseMergerBase = require('./ResponseMergerBase');
@@ -13,7 +13,7 @@ const md5 = require('md5');
  *
  * @class MultipartRelatedResponse
  */
-module.exports = class MultipartRelatedResponse extends ResponseMergerBase implements ResponseMergerInterface {
+class MultipartRelatedResponse extends ResponseMergerBase {
   /**
    * Merges many responses into a single one.
    *
@@ -88,4 +88,7 @@ module.exports = class MultipartRelatedResponse extends ResponseMergerBase imple
   static _generateDelimiter(): string {
     return md5(Date.now()).substr(0, 6);
   }
-};
+}
+(MultipartRelatedResponse: ResponseMergerStaticsInterface); // eslint-disable-line no-unused-expressions
+
+module.exports = MultipartRelatedResponse;
