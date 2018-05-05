@@ -17,7 +17,9 @@
     "flow": "flow",
     "build": "flow-remove-types src/ --out-dir lib/ && flow-copy-source src lib",
     "lint": "eslint src",
-    "start": "node ./exampleServer.js"
+    "start": "node ./exampleServer.js",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -44,7 +46,8 @@
     "lodash": "^4.17.4",
     "md5": "^2.2.1",
     "request": "^2.81.0",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "snyk": "^1.69.7"
   },
   "devDependencies": {
     "babel-eslint": "^8.0.0",
@@ -63,5 +66,6 @@
   },
   "release": {
     "analyzeCommits": "semantic-release-conventional-commits"
-  }
+  },
+  "snyk": true
 }
