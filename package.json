@@ -40,7 +40,7 @@
     "ajv": "^6.0.0",
     "content-type": "^1.0.2",
     "coveralls": "^3.0.0",
-    "flow-copy-source": "^1.2.0",
+    "flow-copy-source": "^2.0.0",
     "flow-remove-types": "^1.2.1",
     "jsonpath": "^1.0.0",
     "lodash": "^4.17.4",
