@@ -17,13 +17,11 @@ jobs:
   include:
     -
       stage: test
-      node_js: 'lts/boron'
-      # Semantic Release is not used, however it fails the build due to requiring >=8.3.
-      install: yarn --ignore-engines
+      node_js: 'lts/carbon'
       script:
         - yarn lint
         - yarn test
-      after_success:
+        - yarn add --no-lockfile coveralls
         # Report coverage to coveralls.io
         - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
         - rm -rf ./coverage
