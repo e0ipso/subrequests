@@ -90,13 +90,13 @@ const blueprint = [
     requestId: 'req1.1',
     uri: "https://gist.githubusercontent.com/e0ipso/7cafb6b7debe786cfb60f617fa89ba81/raw/a6590d3cc87d0c00485c9e428c8b7c29da21b704/{{req1.body@$['my-key']}}.json",
     action: 'view',
-    waitFor: 'req1'
+    waitFor: ['req1']
   },
   {
     requestId: 'req1.1.1',
     uri: 'https://gist.githubusercontent.com/e0ipso/7cafb6b7debe786cfb60f617fa89ba81/raw/a6590d3cc87d0c00485c9e428c8b7c29da21b704/{{req1.1.body@$.akward[*]}}.json',
     action: 'view',
-    waitFor: 'req1.1'
+    waitFor: ['req1.1']
   }
 ];
 
