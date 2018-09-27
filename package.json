@@ -39,7 +39,7 @@
   "dependencies": {
     "ajv": "^6.0.0",
     "content-type": "^1.0.2",
-    "flow-copy-source": "^1.2.0",
+    "flow-copy-source": "^2.0.1",
     "flow-remove-types": "^1.2.1",
     "jsonpath": "^1.0.0",
     "lodash": "^4.17.4",
@@ -49,13 +49,13 @@
     "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "babel-eslint": "^8.0.0",
+    "babel-eslint": "^9.0.0",
     "eslint": "^5.0.0",
     "eslint-config-airbnb-base": "^12.0.0",
     "eslint-plugin-flowtype": "^2.34.1",
     "eslint-plugin-import": "^2.6.1",
-    "flow-bin": "^0.65.0",
-    "husky": "^0.14.2",
+    "flow-bin": "^0.81.0",
+    "husky": "^1.0.0",
     "istanbul": "^0.4.5",
     "nodeunit": "^0.11.1",
     "semantic-release": "^15.0.0",

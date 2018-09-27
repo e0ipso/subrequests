@@ -2,7 +2,7 @@
 
 export type Subrequest = {
   requestId: string,
-  waitFor: string,
+  waitFor: Array<string>,
   uri: string,
   action: ("view" | "create" | "update" | "replace" | "delete" | "exists" | "discover"),
   body?: Object,
