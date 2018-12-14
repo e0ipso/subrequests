@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.10.1
+version: v1.13.1
 ignore: {}
 # patches apply the minimum changes required to fix a vulnerability
 patch:
@@ -9,3 +9,12 @@ patch:
   'npm:request:20160119':
     - coveralls > log-driver > codecov.io > request:
         patched: '2018-02-16T03:04:44.528Z'
+  'npm:hoek:20180212':
+    - flow-copy-source > chokidar > fsevents > node-pre-gyp > hawk > hoek:
+        patched: '2018-12-14T08:45:36.192Z'
+    - flow-copy-source > chokidar > fsevents > node-pre-gyp > hawk > boom > hoek:
+        patched: '2018-12-14T08:45:36.192Z'
+    - flow-copy-source > chokidar > fsevents > node-pre-gyp > hawk > sntp > hoek:
+        patched: '2018-12-14T08:45:36.192Z'
+    - flow-copy-source > chokidar > fsevents > node-pre-gyp > hawk > cryptiles > boom > hoek:
+        patched: '2018-12-14T08:45:36.192Z'
