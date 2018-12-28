@@ -4,8 +4,8 @@ import type { Subrequest, SubrequestsTree } from '../types/BlueprintManager';
 
 const _ = require('lodash');
 const Ajv = require('ajv');
-const blueprintSchema = require('../schema.json');
 const uuid = require('uuid').v4;
+const blueprintSchema = require('../schema.json');
 
 // Compile the schema in the global scope so we can avoid multiple computations.
 const ajv = new Ajv({ allErrors: true });
@@ -33,7 +33,7 @@ module.exports = class BlueprintManager {
   static parse(text: string): SubrequestsTree {
     const input = JSON.parse(text);
     this.validateInput(input);
-    const parsed : Array<Subrequest> = input.map(this.fillDefaults);
+    const parsed: Array<Subrequest> = input.map(this.fillDefaults);
 
     return this.isValidTree(parsed)
       // Find the execution sequences.
@@ -64,9 +64,9 @@ module.exports = class BlueprintManager {
     rawItem._resolved = false;
     // Detect if there is an encoded token. If so, then decode the URI.
     if (
-      rawItem.uri &&
-      rawItem.uri.indexOf('%7B%7B') !== -1 &&
-      rawItem.uri.indexOf('%7D%7D') !== -1
+      rawItem.uri
+      && rawItem.uri.indexOf('%7B%7B') !== -1
+      && rawItem.uri.indexOf('%7D%7D') !== -1
     ) {
       rawItem.uri = decodeURIComponent(rawItem.uri);
     }
@@ -91,16 +91,17 @@ module.exports = class BlueprintManager {
     const sequence: SubrequestsTree = [
       parsed.filter(({ waitFor }) => _.difference(waitFor, ['<ROOT>']).length === 0),
     ];
-    let subreqsWithUnresolvedDeps = parsed.filter(({ waitFor }) =>
-      _.difference(waitFor, ['<ROOT>']).length !== 0);
+    let subreqsWithUnresolvedDeps = parsed
+      .filter(({ waitFor }) => _.difference(waitFor, ['<ROOT>']).length !== 0);
     // Checks if a subrequest has its dependency resolved.
     // const dependencyIsResolved = ({ waitFor }) => sequence[sequencePosition]
     //   .some(({ requestId }) => requestId === waitFor);
-    const dependencyIsResolved = ({ waitFor }, seq) =>
-      _.difference(waitFor, this._allSubrequestIds(seq)).length === 0;
+    const dependencyIsResolved = ({ waitFor }, seq) => _.difference(
+      waitFor,
+      this._allSubrequestIds(seq)
+    ).length === 0;
     while (subreqsWithUnresolvedDeps && subreqsWithUnresolvedDeps.length) {
-      const noDeps = subreqsWithUnresolvedDeps.filter(sub =>
-        dependencyIsResolved(sub, sequence));
+      const noDeps = subreqsWithUnresolvedDeps.filter(sub => dependencyIsResolved(sub, sequence));
       if (noDeps.length === 0) {
         throw new Error('Waiting for unresolvable request. Abort.');
       }

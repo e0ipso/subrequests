@@ -1,7 +1,7 @@
 // @flow
 
 import type { RequestorInterface } from '../types/Requestor';
-import type { Response } from '../types/Responses';
+import type { Response, ResponseMergerStaticsInterface } from '../types/Responses';
 
 const BlueprintManager = require('./BlueprintManager');
 const HttpRequestor = require('./HttpRequestor');
@@ -26,7 +26,7 @@ const SubrequestsManager = require('./SubrequestsManager');
 function request(
   blueprint: string,
   requestor: RequestorInterface = new HttpRequestor(),
-  MergerClass = MultipartRelatedResponse
+  MergerClass: ResponseMergerStaticsInterface = MultipartRelatedResponse
 ): Promise<Response> {
   // Parse the blueprint to build the request tree.
   const tree = BlueprintManager.parse(blueprint);
