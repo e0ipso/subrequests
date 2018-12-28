@@ -35,8 +35,10 @@ module.exports = class JsonPathReplacer {
   static replaceBatch(batch: Array<Subrequest>, pool: Array<Response>): Array<Subrequest> {
     // Apply replacements to each one of the items.
     return batch.reduce(
-      (carry: Array<Subrequest>, subrequest: Subrequest) =>
-        [...carry, ...(this.replaceItem(subrequest, pool))],
+      (carry: Array<Subrequest>, subrequest: Subrequest) => {
+        const replaced = this.replaceItem(subrequest, pool);
+        return [...carry, ...replaced];
+      },
       []
     );
   }
@@ -354,7 +356,8 @@ module.exports = class JsonPathReplacer {
     while (match) {
       // We only care about the first three items: full match, subject ID and
       // JSONPath query.
-      matches.push(match.slice(0, 3));
+      const [full, subjectId, query] = match;
+      matches.push([full, subjectId, query]);
       match = regexp.exec(subject);
     }
     return matches;
@@ -376,13 +379,12 @@ module.exports = class JsonPathReplacer {
   static _validateJsonPathReplacements(toReplace: Array<*>): void {
     // Check that all the elements in the array are strings.
     const isValid = Array.isArray(toReplace)
-      && toReplace.reduce((valid, item) =>
-        valid && (
-          typeof item === 'string' ||
-          item instanceof String ||
-          typeof item === 'number' ||
-          item instanceof Number
-        ), true);
+      && toReplace.reduce((valid, item) => valid && (
+        typeof item === 'string'
+          || item instanceof String
+          || typeof item === 'number'
+          || item instanceof Number
+      ), true);
     if (!isValid) {
       throw new Error(`The replacement token did not a list of strings. Instead it found  ${JSON.stringify(toReplace)}.`);
     }

@@ -3,9 +3,9 @@
 import type { Response, ResponseMergerStaticsInterface } from '../types/Responses';
 
 const contentType = require('content-type');
+const md5 = require('md5');
 const ResponseMergerBase = require('./ResponseMergerBase');
 
-const md5 = require('md5');
 
 /**
  * @classdesc
