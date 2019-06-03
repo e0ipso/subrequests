@@ -41,7 +41,7 @@
     "content-type": "^1.0.4",
     "flow-copy-source": "^2.0.2",
     "flow-remove-types": "^1.2.3",
-    "jsonpath": "^1.0.0",
+    "jsonpath": "^1.0.2",
     "lodash": "^4.17.11",
     "md5": "^2.2.1",
     "request": "^2.88.0",
