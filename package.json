@@ -42,7 +42,7 @@
     "flow-copy-source": "^2.0.2",
     "flow-remove-types": "^1.2.3",
     "jsonpath": "^1.0.0",
-    "lodash": "^4.17.16",
+    "lodash": "^4.17.21",
     "md5": "^2.2.1",
     "request": "^2.88.0",
     "snyk": "^1.425.4",
