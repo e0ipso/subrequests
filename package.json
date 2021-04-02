@@ -41,11 +41,11 @@
     "content-type": "^1.0.4",
     "flow-copy-source": "^2.0.2",
     "flow-remove-types": "^1.2.3",
-    "jsonpath": "^1.0.0",
+    "jsonpath": "^1.1.1",
     "lodash": "^4.17.16",
     "md5": "^2.2.1",
     "request": "^2.88.0",
-    "snyk": "^1.425.4",
+    "snyk": "^1.518.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
