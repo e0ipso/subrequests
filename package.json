@@ -1,6 +1,6 @@
 {
   "name": "subrequests",
-  "version": "0.0.0-development",
+  "version": "0.0.0",
   "description": "Make many requests in one go.",
   "main": "lib/index.js",
   "directories": {
