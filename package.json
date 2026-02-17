@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/e0ipso/subrequests#readme",
   "dependencies": {
-    "ajv": "^6.12.3",
+    "ajv": "^8.18.0",
     "content-type": "^1.0.4",
     "flow-copy-source": "^2.0.9",
     "flow-remove-types": "^1.2.3",
